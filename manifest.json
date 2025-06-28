@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "Explain with Gemini",
+    "name": "Ask Ajith",
     "version": "1.0",
     "description": "Explains selected code/text using Gemini Flash 2.0.",
     "permissions": ["contextMenus", "scripting", "activeTab"],

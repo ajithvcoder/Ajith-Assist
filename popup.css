@@ -1,0 +1,45 @@
+.gemini-popup {
+    position: fixed;
+    top: 20%;
+    left: 50%;
+    color: black;
+    transform: translateX(-50%);
+    background: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    padding: 20px;
+    max-width: 400px;
+    z-index: 9999;
+    font-family: sans-serif;
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  
+  .popup-inner {
+    position: relative;
+  }
+  
+  .close-btn {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    border: none;
+    background: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #333;
+  }
+  
+  .gemini-popup.fade-out {
+    animation: fadeOut 0.3s ease-in-out forwards;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translate(-50%, -10%); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+  }
+  
+  @keyframes fadeOut {
+    to { opacity: 0; transform: translate(-50%, -10%); }
+  }
+  

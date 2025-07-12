@@ -1,22 +1,31 @@
 {
     "manifest_version": 3,
-    "name": "Ask Ajith",
+    "name": "Agentic Ajith Assist",
     "version": "1.0",
-    "description": "Explains selected code/text using Gemini Flash 2.0.",
-    "permissions": ["contextMenus", "scripting", "activeTab"],
-    "host_permissions": ["<all_urls>"],
+    "description": "AI-powered agentic assistant with multi-step reasoning",
+    "permissions": [
+      "scripting",
+      "contextMenus",
+      "activeTab",
+      "storage",
+      "tabs"
+    ],
+    "host_permissions": [
+      "http://localhost:8000/"
+    ],
+  
     "background": {
       "service_worker": "background.js"
     },
     "content_scripts": [
-      {
-        "matches": ["<all_urls>"],
-        "js": ["content.js"]
-      }
-    ],
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["agentic-popup.css"]
+    }
+  ],
     "web_accessible_resources": [{
-      "resources": ["popup.css"],
+      "resources": ["agentic-popup.css"],
       "matches": ["<all_urls>"]
     }]
   }
-  

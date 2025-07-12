@@ -1,208 +1,155 @@
-# Ask Ajith - Chrome Extension
+# Ask Ajith - Chrome Extension (Agentic)
 
-A powerful Chrome extension that uses Google's Gemini 2.0 Flash AI model to provide intelligent text summarization and email reply generation through right-click context menus.
+A powerful Chrome extension that uses Google's Gemini 2.0 Flash AI model to provide intelligent agentic analysis, research, writing, and code generation tasks through right-click context menus.
 
-![](./assets/version-1-usage.gif)
+![](./assets/agentic-1-usage.gif)
 
-## 🚀 Features
-
-- **Smart Text Summarization**: Summarize any selected text with AI-powered insights
-- **Email Reply Generation**: Generate professional, polite email replies from selected text
-- **Context Menu Integration**: Easy access through right-click menus on any webpage
-- **Clean Popup Interface**: Beautiful, animated popup displays for AI responses
-- **Copy to Clipboard**: One-click copying of generated replies
-- **Cross-Platform**: Works on any website with text content
-
-## 🎯 Use Cases
-
-- **Content Summarization**: Quickly summarize articles, documents, or long text passages
-- **Email Management**: Generate professional replies to emails and messages
-- **Code Explanation**: Get AI-powered explanations of code snippets
-- **Document Analysis**: Summarize reports, papers, or any written content
-- **Communication Assistance**: Create polite, professional responses for various contexts
-
-## 📦 Installation
-
-### Method 1: Load as Unpacked Extension (Development)
-
-1. Download or clone this repository
-2. Open Chrome and navigate to `chrome://extensions/`
-3. Enable "Developer mode" in the top right corner
-4. Click "Load unpacked" and select the `Office-Assist` folder
-5. The extension should now appear in your extensions list
-
-### Method 2: Install from Chrome Web Store (When Available)
-
-*Note: This extension is not currently published on the Chrome Web Store*
-
-## 🎮 Usage
-
-### Text Summarization
-
-1. **Select Text**: Highlight any text on any webpage
-2. **Right-Click**: Right-click on the selected text
-3. **Choose Option**: Select "Summarize with Gemini" from the context menu
-4. **View Result**: A popup will appear with the AI-generated summary
-
-### Email Reply Generation
-
-1. **Select Email Text**: Highlight the email content you want to reply to
-2. **Right-Click**: Right-click on the selected text
-3. **Choose Option**: Select "Reply with Gemini" from the context menu
-4. **View Result**: A popup will appear with a professional reply
-5. **Copy Reply**: Click the "📋 Copy Reply" button to copy the response to clipboard
-
-## 🛠️ Technical Details
-
-### File Structure
 
 ```
-Office-Assist/
-├── manifest.json      # Extension configuration
-├── background.js      # Service worker and context menu logic
-├── content.js         # Content script (currently empty)
-├── popup.css          # Styling for popup interface
-├── assets/            # Asset directory (empty)
-└── README.md          # This file
+
+## Setup Instructions
+
+### 1. Install FastAPI Server Dependencies
+
+```bash
+# Create a virtual environment
+python -m venv agentic_ai_env
+source agentic_ai_env/bin/activate  # On Windows: agentic_ai_env\Scripts\activate
+
+# Install dependencies
+pip install fastapi uvicorn pydantic google-generativeai python-multipart
 ```
 
-### Permissions
+### 2. Setup Gemini API Key
 
-- **contextMenus**: Required to create right-click context menu options
-- **scripting**: Required to inject scripts into web pages
-- **activeTab**: Required to access the currently active tab
-- **host_permissions**: Access to all URLs for cross-site functionality
+1. Get your Gemini API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
+2. Replace `YOUR_GEMINI_API_KEY_HERE` in the Python code with your actual API key
 
-### Technologies Used
+### 3. Run the FastAPI Server
 
-- **Manifest V3**: Latest Chrome extension manifest format
-- **Google Gemini 2.0 Flash API**: AI model for text processing
-- **Context Menus API**: Chrome extension context menu integration
-- **Scripting API**: Dynamic script injection
-- **CSS Animations**: Smooth popup transitions
+```bash
+# Save the Python code as main.py
+python main.py
 
-### API Integration
+# Or use uvicorn directly
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
 
-The extension uses Google's Gemini 2.0 Flash model through the Generative Language API:
+The server will be available at `http://localhost:8000`
+
+### 4. Chrome Extension Setup
+
+Create these files in a new folder:
+
+**manifest.json**
+```json
+
+```
+
+**background.js** (copy from the Python code comments)
+
+**agentic-popup.css** (copy from above)
+
+### 5. Load the Extension
+
+1. Open Chrome and go to `chrome://extensions/`
+2. Enable "Developer mode"
+3. Click "Load unpacked" and select your extension folder
+
+## How to Use
+
+### Basic Usage
+1. Select any text on a webpage
+2. Right-click and choose from:
+   - 🤖 Agentic Analysis
+   - 🔍 Research Assistant  
+   - ✍️ Writing Assistant
+   - 💻 Code Assistant
+
+### Advanced Features
+
+The agentic AI system provides:
+
+- **Multi-step reasoning**: Breaks complex tasks into manageable steps
+- **Self-evaluation**: Checks and improves its own outputs
+- **Adaptive planning**: Creates dynamic execution plans based on input analysis
+- **Quality scoring**: Provides confidence scores for each step
+- **Context awareness**: Maintains context across all processing steps
+
+### API Endpoints
+
+- `POST /agent/execute` - Execute agentic tasks
+- `POST /agent/chat` - Simple chat interface
+- `GET /agent/status` - Check agent capabilities
+- `GET /` - Health check
+
+### Example API Usage
 
 ```javascript
-const API_KEY = 'YOUR_API_KEY';
-const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + API_KEY, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }]
-    })
+// Direct API call
+const response = await fetch('http://localhost:8000/agent/execute', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    text: "Explain quantum computing",
+    task_type: "analyze",
+    context: { domain: "technical" },
+    user_preferences: { format: "detailed", tone: "educational" }
+  })
 });
+
+const result = await response.json();
+console.log(result);
 ```
 
-## 🎨 User Interface
+## Key Features
 
-### Popup Design
+### 1. Agentic Reasoning
+- Multi-step task decomposition
+- Adaptive planning based on input analysis
+- Self-evaluation and refinement
+- Context-aware execution
 
-- **Centered Position**: Appears in the center of the screen
-- **Clean Styling**: White background with subtle shadows and rounded corners
-- **Smooth Animations**: Fade-in and fade-out transitions
-- **Responsive Layout**: Adapts to content length
-- **Close Button**: Easy dismissal with the × button
+### 2. Quality Assurance
+- Confidence scoring for each step
+- Automatic result improvement for low-quality outputs
+- Final result synthesis and evaluation
 
-### Context Menu Options
+### 3. User Experience
+- Real-time progress indication
+- Detailed execution transparency
+- Step-by-step reasoning display
+- Easy result copying and refinement
 
-- **Summarize with Gemini**: Generates concise summaries
-- **Reply with Gemini**: Creates professional email replies
+### 4. Extensibility
+- Modular architecture
+- Easy to add new task types
+- Configurable user preferences
+- API-first design
 
-## 🔧 Development
+What Makes This "Agentic":
 
-### Prerequisites
+Goal-oriented: Each task has a clear goal and success criteria
+Multi-step execution: Complex reasoning chains with intermediate steps
+Self-monitoring: Quality checks and confidence scoring
+Adaptive behavior: Plans change based on input analysis
+Autonomous refinement: Improves its own outputs without human intervention
 
-- Google Chrome browser
-- Basic knowledge of JavaScript and Chrome Extensions
-- Google Gemini API key (for testing)
 
-### Local Development
+## Troubleshooting
 
-1. Clone the repository
-2. Update the API key in `background.js` if needed
-3. Go to `chrome://extensions/` and click "Load unpacked"
-4. Select the `Office-Assist` folder
-5. Test the extension on any webpage
+### Common Issues
 
-### Adding New Features
+1. **Server not starting**: Check if port 8000 is available
+2. **API key errors**: Ensure your Gemini API key is valid
+3. **Extension not loading**: Check manifest.json syntax
+4. **CORS errors**: Server includes CORS middleware for all origins
 
-To add new context menu options:
+### Development Tips
 
-1. Update `background.js` to create new menu items
-2. Add corresponding click handlers
-3. Modify the prompt generation logic
-4. Update the popup display as needed
+1. Use `uvicorn main:app --reload` for development
+2. Check browser console for extension errors
+3. Monitor server logs for API issues
+4. Test with simple text selections first
 
-Example:
-```javascript
-chrome.contextMenus.create({
-  id: "explainWithGemini",
-  title: "Explain with Gemini",
-  contexts: ["selection"]
-});
-```
-
-## 🔒 Security & Privacy
-
-- **API Key**: Currently uses a hardcoded API key (should be moved to environment variables for production)
-- **Data Processing**: Text is sent to Google's Gemini API for processing
-- **No Data Storage**: The extension doesn't store any user data locally
-- **Minimal Permissions**: Only requests necessary permissions for functionality
-
-## 🐛 Troubleshooting
-
-### Extension Not Working
-
-- Ensure the extension is properly loaded in Chrome
-- Check the browser console for any error messages
-- Verify that the API key is valid and has proper permissions
-
-### Context Menu Not Appearing
-
-- Make sure text is selected before right-clicking
-- Check that the extension is enabled
-- Try refreshing the webpage
-
-### API Errors
-
-- Verify your Gemini API key is valid
-- Check your API quota and billing status
-- Ensure you have proper access to the Gemini 2.0 Flash model
-
-## 📝 API Key Setup
-
-To use your own API key:
-
-1. Get a Google Gemini API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
-2. Replace the API key in `background.js`:
-   ```javascript
-   const API_KEY = 'YOUR_API_KEY_HERE';
-   ```
-3. Reload the extension
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-## 📄 License
-
-This project is open source. Feel free to modify and distribute as needed.
-
-## 🆘 Support
-
-For issues, questions, or feature requests, please open an issue in the repository.
-
-## 📈 Version History
-
-- **v1.0**: Initial release with summarization and reply generation features
-
----
-
-**Note**: This extension requires an active internet connection and a valid Google Gemini API key to function properly.
+This agentic AI system provides a sophisticated foundation for building intelligent applications that can reason, plan, and execute complex tasks autonomously while maintaining transparency and user control.

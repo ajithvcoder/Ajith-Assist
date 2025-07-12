@@ -1,75 +1,90 @@
-chrome.runtime.onInstalled.addListener(() => {
-    chrome.contextMenus.create({
-      id: "summarizeWithGemini",
-      title: "Summarize with Gemini",
-      contexts: ["selection"]
-    });
-  
-    chrome.contextMenus.create({
-      id: "replyWithGemini",
-      title: "Reply with Gemini",
-      contexts: ["selection"]
-    });
-  });
-  
-  chrome.contextMenus.onClicked.addListener(async (info, tab) => {
-    const selectedText = info.selectionText;
-    const isReply = info.menuItemId === "replyWithGemini";
-    const prompt = isReply
-      ? `You're a helpful assistant. Write a concise, polite, professional reply to the email below:\n\n"${selectedText}"`
-      : `Summarize the following text clearly and briefly:\n\n"${selectedText}"`;
-  
-    chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      func: generateGeminiPopup,
-      args: [prompt, isReply]
-    });
-  });
-  
-  async function generateGeminiPopup(prompt, isReply) {
-    const API_KEY = 'YOUR_GEMINI_API_KEY_HERE';
+// Background script with comprehensive logging
+const LOG_PREFIX = '[Agentic AI Extension]';
 
-    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + API_KEY, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }]
-        })
+// Utility function for consistent logging
+function log(level, message, data = null) {
+  const timestamp = new Date().toISOString();
+  const logMessage = `${LOG_PREFIX} [${level.toUpperCase()}] ${timestamp}: ${message}`;
+  
+  if (level === 'error') {
+    console.error(logMessage, data || '');
+  } else if (level === 'warn') {
+    console.warn(logMessage, data || '');
+  } else {
+    console.log(logMessage, data || '');
+  }
+}
+
+chrome.runtime.onInstalled.addListener(() => {
+  log('info', 'Extension installed/updated, creating context menus');
+  
+  const menuItems = [
+    { id: "agenticAnalyze", title: "🤖 Agentic Analysis", icon: "🤖" },
+    { id: "agenticResearch", title: "🔍 Research Assistant", icon: "🔍" },
+    { id: "agenticWrite", title: "✍️ Writing Assistant", icon: "✍️" },
+    { id: "agenticCode", title: "💻 Code Assistant", icon: "💻" }
+  ];
+
+  menuItems.forEach(item => {
+    try {
+      chrome.contextMenus.create({
+        id: item.id,
+        title: item.title,
+        contexts: ["selection"]
+      });
+      log('info', `Created context menu: ${item.title}`);
+    } catch (error) {
+      log('error', `Failed to create context menu ${item.title}`, error);
+    }
+  });
+});
+
+chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+  const selectedText = info.selectionText;
+  const taskType = info.menuItemId.replace('agentic', '').toLowerCase();
+  
+  log('info', `Context menu clicked: ${info.menuItemId}`, {
+    taskType,
+    textLength: selectedText?.length || 0,
+    tabId: tab.id,
+    url: tab.url
+  });
+  
+  if (!selectedText || selectedText.trim().length === 0) {
+    log('warn', 'No text selected');
+    return;
+  }
+
+  try {
+    // Send message to content script instead of executing inline
+    chrome.tabs.sendMessage(tab.id, {
+      action: 'processWithAgenticAI',
+      selectedText: selectedText,
+      taskType: taskType
     });
-  
-  
-    const data = await response.json();
-    const output = data?.candidates?.[0]?.content?.parts?.[0]?.text || "No response generated.";
-  
-    const style = document.createElement("link");
-    style.rel = "stylesheet";
-    style.href = chrome.runtime.getURL("popup.css");
-    document.head.appendChild(style);
-  
-    const popup = document.createElement("div");
-    popup.className = "gemini-popup";
-    popup.innerHTML = `
-      <div class="popup-inner">
-        <button class="close-btn">&times;</button>
-        <p>${output.replace(/\n/g, "<br>")}</p>
-        ${isReply ? `<button class="copy-btn">📋 Copy Reply</button>` : ""}
-      </div>
-    `;
-  
-    document.body.appendChild(popup);
-  
-    popup.querySelector(".close-btn").onclick = () => {
-      popup.classList.add("fade-out");
-      setTimeout(() => popup.remove(), 300);
-    };
-  
-    if (isReply) {
-      popup.querySelector(".copy-btn").onclick = () => {
-        navigator.clipboard.writeText(output);
-        const btn = popup.querySelector(".copy-btn");
-        btn.textContent = "✅ Copied!";
-        setTimeout(() => (btn.textContent = "📋 Copy Reply"), 1500);
-      };
+    log('info', 'Message sent to content script');
+  } catch (error) {
+    log('error', 'Failed to send message to content script', error);
+    
+    // Fallback: inject content script if not already present
+    try {
+      await chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        files: ['content.js']
+      });
+      
+      // Retry sending message after injection
+      setTimeout(() => {
+        chrome.tabs.sendMessage(tab.id, {
+          action: 'processWithAgenticAI',
+          selectedText: selectedText,
+          taskType: taskType
+        });
+      }, 100);
+      
+      log('info', 'Content script injected and message sent');
+    } catch (injectError) {
+      log('error', 'Failed to inject content script', injectError);
     }
   }
-  
+});
